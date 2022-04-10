@@ -32,6 +32,19 @@ resource "aws_default_security_group" "main" {
     }
   }
 
+  dynamic "egress" {
+    for_each = var.default_security_group_egress
+    content {
+      self            = lookup(egress.value, "self", null)
+      protocol        = lookup(egress.value, "protocol", -1)
+      from_port       = lookup(egress.value, "from_port", 0)
+      to_port         = lookup(egress.value, "to_port", 0)
+      cidr_blocks     = compact(split(",", lookup(egress.value, "cidr_blocks", "")))
+      security_groups = compact(split(",", lookup(egress.value, "security_groups", "")))
+      description     = lookup(egress.value, "description", "")
+    }
+  }
+
   tags = merge(
     { "Name" = var.name },
     var.tags,

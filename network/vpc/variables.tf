@@ -16,6 +16,12 @@ variable "default_security_group_ingress" {
   default     = []
 }
 
+variable "default_security_group_egress" {
+  description = "List of maps of egress rules to set on the default security group"
+  type        = list(map(string))
+  default     = []
+}
+
 variable "name" {
   description = "Name to be used on all the resources as identifier"
   type        = string
