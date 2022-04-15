@@ -3,7 +3,7 @@ data "aws_availability_zones" "available" {
 }
 
 resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
+  cidr_block           = var.cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
 
@@ -58,4 +58,19 @@ resource "aws_vpc_ipv4_cidr_block_association" "main" {
   vpc_id = aws_vpc.main.id
 
   cidr_block = element(var.secondary_cidr_blocks, count.index)
+}
+
+################################################################################
+# Internet Gateway
+################################################################################
+
+resource "aws_internet_gateway" "main" {
+  count = var.create_igw && length(var.public_subnets) > 0 ? 1 : 0
+
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    { "Name" = var.name },
+    var.tags,
+  )
 }

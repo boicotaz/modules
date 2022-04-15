@@ -1,8 +1,15 @@
+variable "cidr" {
+  description = "The CIDR block for the VPC. Default value is a valid CIDR, but not acceptable by AWS and should be overridden"
+  type        = string
+  default     = "0.0.0.0/0"
+}
+
 variable "secondary_cidr_blocks" {
   description = "List of secondary CIDR blocks to associate with the VPC to extend the IP Address pool"
   type        = list(string)
   default     = []
 }
+
 
 variable "manage_default_security_group" {
   description = "Should be true to adopt and manage default security group"
@@ -19,6 +26,18 @@ variable "default_security_group_ingress" {
 variable "default_security_group_egress" {
   description = "List of maps of egress rules to set on the default security group"
   type        = list(map(string))
+  default     = []
+}
+
+variable "create_igw" {
+  description = "Controls if an Internet Gateway is created for public subnets and the related routes that connect them."
+  type        = bool
+  default     = true
+}
+
+variable "public_subnets" {
+  description = "A list of public subnets inside the VPC"
+  type        = list(string)
   default     = []
 }
 
