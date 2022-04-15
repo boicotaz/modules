@@ -41,6 +41,12 @@ variable "public_subnets" {
   default     = []
 }
 
+variable "public_subnet_suffix" {
+  description = "Suffix to append to public subnets name"
+  type        = string
+  default     = "public"
+}
+
 variable "name" {
   description = "Name to be used on all the resources as identifier"
   type        = string
