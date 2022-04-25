@@ -41,6 +41,18 @@ variable "public_subnets" {
   default     = []
 }
 
+variable "private_subnets" {
+  description = "A list of private subnets inside the VPC"
+  type        = list(string)
+  default     = []
+}
+
+variable "private_subnet_suffix" {
+  description = "Suffix to append to private subnets name"
+  type        = string
+  default     = "private"
+}
+
 variable "public_subnet_suffix" {
   description = "Suffix to append to public subnets name"
   type        = string

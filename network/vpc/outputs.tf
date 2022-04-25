@@ -22,3 +22,8 @@ output "public_subnet_arns" {
   description = "List of ARNs of public subnets"
   value       = aws_subnet.public[*].arn
 }
+
+output "private_subnets" {
+  description = "List of IDs of private subnets"
+  value       = aws_subnet.private[*].id
+}

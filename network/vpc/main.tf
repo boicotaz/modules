@@ -75,6 +75,31 @@ resource "aws_internet_gateway" "main" {
   )
 }
 
+################################################################################
+# NAT Gateway
+################################################################################
+
+resource "aws_nat_gateway" "this" {
+  count = length(var.private_subnets) > 0 ? 1 : 0
+
+  allocation_id = aws_eip.nat[0].id
+  subnet_id     = aws_subnet.public[0].id
+
+  tags = merge(
+    { "Name" = var.name },
+    var.tags
+  )
+
+  # To ensure proper ordering, it is recommended to add an explicit dependency
+  # on the Internet Gateway for the VPC.
+  depends_on = [aws_internet_gateway.main]
+}
+
+resource "aws_eip" "nat" {
+  count = length(var.private_subnets) > 0 ? 1 : 0
+
+  vpc = true
+}
 
 ################################################################################
 # Publiс routes
@@ -104,6 +129,32 @@ resource "aws_route" "public_internet_gateway" {
 }
 
 ################################################################################
+# Private routes
+################################################################################
+
+resource "aws_route_table" "private" {
+  count = length(var.private_subnets) > 0 ? 1 : 0
+
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    { "Name" = "${var.name}-${var.private_subnet_suffix}" },
+    var.tags
+  )
+}
+
+resource "aws_route" "public_nat_gateway" {
+  count = length(var.private_subnets) > 0 ? 1 : 0
+
+  route_table_id         = aws_route_table.private[0].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.this[0].id
+
+  timeouts {
+    create = "5m"
+  }
+}
+################################################################################
 # Public subnet
 ################################################################################
 
@@ -127,6 +178,27 @@ resource "aws_subnet" "public" {
 }
 
 ################################################################################
+# Private subnet
+################################################################################
+
+resource "aws_subnet" "private" {
+  count = length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
+
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = element(concat(var.private_subnets, [""]), count.index)
+  availability_zone = element(data.aws_availability_zones.available.names, count.index)
+
+  tags = merge(
+    {
+      "Name" = format(
+        "${var.name}-${var.private_subnet_suffix}-%s",
+        element(data.aws_availability_zones.available.names, count.index),
+      )
+    },
+    var.tags
+  )
+}
+################################################################################
 # Route table association
 ################################################################################
 
@@ -135,4 +207,11 @@ resource "aws_route_table_association" "public" {
 
   subnet_id      = element(aws_subnet.public[*].id, count.index)
   route_table_id = aws_route_table.public[0].id
+}
+
+resource "aws_route_table_association" "private" {
+  count = length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
+
+  subnet_id      = element(aws_subnet.private[*].id, count.index)
+  route_table_id = aws_route_table.private[0].id
 }
