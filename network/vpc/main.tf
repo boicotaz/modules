@@ -80,7 +80,7 @@ resource "aws_internet_gateway" "main" {
 ################################################################################
 
 resource "aws_nat_gateway" "this" {
-  count = length(var.private_subnets) > 0 ? 1 : 0
+  count = var.create_ngw && length(var.private_subnets) > 0 ? 1 : 0
 
   allocation_id = aws_eip.nat[0].id
   subnet_id     = aws_subnet.public[0].id
@@ -96,7 +96,7 @@ resource "aws_nat_gateway" "this" {
 }
 
 resource "aws_eip" "nat" {
-  count = length(var.private_subnets) > 0 ? 1 : 0
+  count = var.create_ngw && length(var.private_subnets) > 0 ? 1 : 0
 
   vpc = true
 }
@@ -144,7 +144,7 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route" "public_nat_gateway" {
-  count = length(var.private_subnets) > 0 ? 1 : 0
+  count = var.create_ngw && length(var.private_subnets) > 0 ? 1 : 0
 
   route_table_id         = aws_route_table.private[0].id
   destination_cidr_block = "0.0.0.0/0"

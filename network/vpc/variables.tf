@@ -35,6 +35,12 @@ variable "create_igw" {
   default     = true
 }
 
+variable "create_ngw" {
+  description = "Controls if a NATGateway is created for private subnets and the related routes that connect them."
+  type        = bool
+  default     = true
+}
+
 variable "public_subnets" {
   description = "A list of public subnets inside the VPC"
   type        = list(string)
