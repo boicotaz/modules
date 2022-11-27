@@ -18,12 +18,17 @@ output "public_subnets" {
   value       = aws_subnet.public[*].id
 }
 
+output "private_subnets" {
+  description = "List of IDs of private subnets"
+  value       = aws_subnet.private[*].id
+}
+
 output "public_subnet_arns" {
   description = "List of ARNs of public subnets"
   value       = aws_subnet.public[*].arn
 }
 
-output "private_subnets" {
-  description = "List of IDs of private subnets"
-  value       = aws_subnet.private[*].id
+output "private_route_table_id" {
+  description = "The ID of the route table used in private subnets"
+  value       = try(aws_route_table.private[0].id, null)
 }
